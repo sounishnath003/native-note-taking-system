@@ -13,13 +13,13 @@ USAGE:
 EXAMPLES:
 
    notes /path/to/notes
-      compiles all notes in the specified directory
+      compiles all notes in the specified directory and its subdirectories, and creates a merged PDF in the parent directory
 
-   notes /path/to/notes MS1
-      compiles notes in MS1 subfolder
+   notes /path/to/notes somefolder
+      compiles notes in somefolder subfolder, and creates a merged PDF in that subfolder
 
-   notes /path/to/notes MS1/mod1
-      compiles notes in MS1/mod1 subfolder
+   notes /path/to/notes somefolder/subfolder
+      compiles notes in somefolder/subfolder, and creates a merged PDF in that subfolder
 
 EOF
 }
@@ -72,162 +72,76 @@ process_directory() {
    echo "Completed processing: $dir"
 }
 
+# Merge all notes from all subfolders into a single PDF in the parent directory
+make_merged_pdf_for_parent() {
+   local parent_dir="$1"
+   local merged_output_name
+   merged_output_name=$(basename "$parent_dir")
+
+   # Find all .md and .txt files in all subdirectories (excluding the parent itself)
+   local all_files=()
+   while IFS= read -r -d '' file; do
+      all_files+=("$file")
+   done < <(find "$parent_dir" -mindepth 2 -type f \( -name "*.md" -o -name "*.txt" \) -print0 | sort -z)
+
+   if [[ ${#all_files[@]} -eq 0 ]]; then
+      echo "No .md or .txt files found in subfolders of $parent_dir for merged PDF"
+      return 1
+   fi
+
+   local merged_output_file="$parent_dir/$merged_output_name"
+   echo "Creating merged PDF for all subfolders: $merged_output_file.pdf"
+   makepdf "$merged_output_file" "${all_files[@]}"
+   makehtml "$merged_output_file" "${all_files[@]}"
+   echo "Merged PDF and HTML created: $merged_output_file"
+}
+
+# Recursively process all directories containing .md or .txt files
+process_all_recursive() {
+   local base_dir="$1"
+   local found_any=0
+
+   # Find all directories (including base_dir) that contain .md or .txt files
+   while IFS= read -r -d '' dir; do
+      local files=()
+      while IFS= read -r -d '' file; do
+         files+=("$file")
+      done < <(find "$dir" -maxdepth 1 -type f \( -name "*.md" -o -name "*.txt" \) -print0 | sort -z)
+      if [[ ${#files[@]} -gt 0 ]]; then
+         found_any=1
+         local output_name
+         output_name=$(basename "$dir")
+         process_directory "$dir" "$output_name"
+      fi
+   done < <(find "$base_dir" -type d -print0 | sort -z)
+
+   if [[ $found_any -eq 0 ]]; then
+      echo "No .md or .txt files found in $base_dir or its subdirectories"
+      return 1
+   fi
+
+   # After processing all, create merged PDF for the parent directory
+   make_merged_pdf_for_parent "$base_dir"
+}
+
 process_subfolder() {
    local subfolder="$1"
    local subfolder_path="$NOTES_DIR/$subfolder"
    
    echo "Processing subfolder: $subfolder"
-   
-   # Check if it's a direct module directory (contains .md/.txt files)
-   if find "$subfolder_path" -maxdepth 1 -type f \( -name "*.md" -o -name "*.txt" \) | grep -q .; then
-      echo "Found note files directly in subfolder, processing as module"
-      process_directory "$subfolder_path" "$(basename "$subfolder")"
-      return 0
+
+   if [[ ! -d "$subfolder_path" ]]; then
+      echo "Subfolder does not exist: $subfolder_path"
+      return 1
    fi
-   
-   # Check for mod* directories
-   local mod_dirs=()
-   while IFS= read -r -d '' dir; do
-      mod_dirs+=("$dir")
-   done < <(find "$subfolder_path" -maxdepth 1 -type d -name "mod*" -print0 | sort -z)
-   
-   if [[ ${#mod_dirs[@]} -gt 0 ]]; then
-      echo "Found ${#mod_dirs[@]} mod* directories"
-      for mod_dir in "${mod_dirs[@]}"; do
-         mod_name=$(basename "$mod_dir")
-         process_directory "$mod_dir" "$mod_name"
-      done
-      
-         # Merge PDFs (even if only one module)
-         cd "$subfolder_path"
-         echo "Merging PDFs for subfolder: $subfolder"
-         
-         local pdf_files=($(find . -name "*.pdf" -type f | sort))
-         if [[ ${#pdf_files[@]} -gt 0 ]]; then
-            if command -v gs >/dev/null 2>&1; then
-               output_pdf="$(basename "$subfolder").pdf"
-               if gs -sDEVICE=pdfwrite -dQUIET -o "$output_pdf" "${pdf_files[@]}" 2>/dev/null; then
-                  echo "Created merged PDF: $output_pdf"
-               else
-                  echo "Failed to merge PDFs for $subfolder"
-               fi
-            else
-               echo "Ghostscript (gs) not found. Skipping PDF merging."
-            fi
-         fi
-         cd - &>/dev/null
-      return 0
-   fi
-   
-   # Check for MS* directories
-   local ms_dirs=()
-   while IFS= read -r -d '' dir; do
-      ms_dirs+=("$dir")
-   done < <(find "$subfolder_path" -maxdepth 1 -type d -name "MS*" -print0 | sort -z)
-   
-   if [[ ${#ms_dirs[@]} -gt 0 ]]; then
-      echo "Found ${#ms_dirs[@]} MS* directories"
-      for ms_dir in "${ms_dirs[@]}"; do
-         ms_name=$(basename "$ms_dir")
-         echo "Processing MS directory: $ms_name"
-         
-         # Find mod* directories in this MS directory
-         local mod_dirs=()
-         while IFS= read -r -d '' dir; do
-            mod_dirs+=("$dir")
-         done < <(find "$ms_dir" -maxdepth 1 -type d -name "mod*" -print0 | sort -z)
-         
-         if [[ ${#mod_dirs[@]} -gt 0 ]]; then
-            echo "Found ${#mod_dirs[@]} modules in $ms_name"
-            for mod_dir in "${mod_dirs[@]}"; do
-               mod_name=$(basename "$mod_dir")
-               process_directory "$mod_dir" "$mod_name"
-            done
-            
-            # Merge PDFs for this MS directory (even if only one module)
-            cd "$ms_dir"
-            echo "Merging PDFs for $ms_name..."
-            
-            local pdf_files=($(find . -name "*.pdf" -type f | sort))
-            if [[ ${#pdf_files[@]} -gt 0 ]]; then
-               if command -v gs >/dev/null 2>&1; then
-                  output_pdf="$ms_name.pdf"
-                  if gs -sDEVICE=pdfwrite -dQUIET -o "$output_pdf" "${pdf_files[@]}" 2>/dev/null; then
-                     echo "Created merged PDF: $output_pdf"
-                  else
-                     echo "Failed to merge PDFs for $ms_name"
-                  fi
-               else
-                  echo "Ghostscript (gs) not found. Skipping PDF merging."
-               fi
-            fi
-            cd - &>/dev/null
-         else
-            echo "No modules found in $ms_name"
-         fi
-      done
-      return 0
-   fi
-   
-   echo "No valid structure found in subfolder: $subfolder"
-   return 1
+
+   # Recursively process all directories under the subfolder
+   process_all_recursive "$subfolder_path"
 }
 
 process_all() {
    echo "Processing all notes in: $NOTES_DIR"
-   
-   # Find all MS* directories
-   local ms_dirs=()
-   while IFS= read -r -d '' dir; do
-      ms_dirs+=("$dir")
-   done < <(find "$NOTES_DIR" -maxdepth 1 -type d -name "MS*" -print0 | sort -z)
-   
-   if [[ ${#ms_dirs[@]} -eq 0 ]]; then
-      echo "No MS* directories found in $NOTES_DIR"
-      return 1
-   fi
-   
-   echo "Found ${#ms_dirs[@]} MS* directories"
-   
-   for ms_dir in "${ms_dirs[@]}"; do
-      ms_name=$(basename "$ms_dir")
-      echo "Processing MS directory: $ms_name"
-      
-      # Find mod* directories in this MS directory
-      local mod_dirs=()
-      while IFS= read -r -d '' dir; do
-         mod_dirs+=("$dir")
-      done < <(find "$ms_dir" -maxdepth 1 -type d -name "mod*" -print0 | sort -z)
-      
-      if [[ ${#mod_dirs[@]} -gt 0 ]]; then
-         echo "Found ${#mod_dirs[@]} modules in $ms_name"
-         for mod_dir in "${mod_dirs[@]}"; do
-            mod_name=$(basename "$mod_dir")
-            process_directory "$mod_dir" "$mod_name"
-         done
-         
-         # Merge PDFs for this MS directory (even if only one module)
-         cd "$ms_dir"
-         echo "Merging PDFs for $ms_name..."
-         
-         local pdf_files=($(find . -name "*.pdf" -type f | sort))
-         if [[ ${#pdf_files[@]} -gt 0 ]]; then
-            if command -v gs >/dev/null 2>&1; then
-               output_pdf="$ms_name.pdf"
-               if gs -sDEVICE=pdfwrite -dQUIET -o "$output_pdf" "${pdf_files[@]}" 2>/dev/null; then
-                  echo "Created merged PDF: $output_pdf"
-               else
-                  echo "Failed to merge PDFs for $ms_name"
-               fi
-            else
-               echo "Ghostscript (gs) not found. Skipping PDF merging."
-            fi
-         fi
-         cd - &>/dev/null
-      else
-         echo "No modules found in $ms_name"
-      fi
-   done
+   process_all_recursive "$NOTES_DIR"
 }
 
 main() {
@@ -263,7 +177,7 @@ main() {
          exit 1
       fi
       
-      # Process specific subfolder
+      # Process specific subfolder (recursively)
       echo "Compiling notes in subfolder: $subfolder"
       process_subfolder "$subfolder"
    else
