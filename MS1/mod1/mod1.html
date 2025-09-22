@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Chapter 1 - Notes</title>
+  <style type="text/css">
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <!DOCTYPE html>
+  <html>
+
+  <head>
+      <meta charset="utf-8">
+      <title>Notes Presentation</title>
+      <style>
+          body {
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+              margin: 2em;
+              background: #fff;
+              color: #222;
+          }
+
+          .slide {
+              page-break-after: always;
+              margin-bottom: 2em;
+          }
+
+          h1,
+          h2,
+          h3 {
+              font-weight: bold;
+          }
+
+          code,
+          pre {
+              font-family: "Fira Mono", "Consolas", monospace;
+              background: #f8f8f8;
+              padding: 0.2em 0.4em;
+              border-radius: 3px;
+          }
+
+          /* Placeholder for more custom styles */
+      </style>
+  </head>
+
+  <body>
+  </body>
+
+  </html>
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div id="chapter-1-distributed-key-storage-systems"
+class="slide section level1">
+<h1>Chapter 1: Distributed Key Storage Systems</h1>
+<blockquote>
+<p>Date: 22-09-2025 Instructor: Sounish Nath</p>
+</blockquote>
+</div><div class="slide"><h2 id="main-points">Main points</h2>
+<pre><code>* Basic amino acid structure
+* Overview of amino acid
+* Peptide, bonds and polypeptide confirmations restrictions
+* Primary, secondary, tertiary structure of proteins in body
+* Diseases caused of manifold of proteins</code></pre>
+</div><div class="slide"><h2 id="basics-of-amino-acid">Basics of Amino Acid</h2>
+<pre><code>* Peptide, bonds and polypeptide confirmations restrictions
+* L and D isomers, L are used for proteins </code></pre>
+</div>
+<div id="chapter-2-raft-consensus-distributed-key-store"
+class="slide section level1">
+<h1>Chapter 2: Raft Consensus Distributed Key store</h1>
+<blockquote>
+<p>Date: 22-09-2025 Author: Sounish Nath</p>
+</blockquote>
+<p>This project is an implementation of a sharded and replicated
+in-memory key-value store in Golang. It uses the Raft consensus
+algorithm for fault tolerance and gRPC for communication between
+nodes.</p>
+</div><div class="slide"><h2 id="features">Features</h2>
+<ul>
+<li><strong>Distributed:</strong> Keys are distributed across multiple
+nodes.</li>
+<li><strong>Fault-Tolerant:</strong> The system can tolerate node
+failures as long as a quorum of nodes is alive.</li>
+<li><strong>Strongly Consistent:</strong> All writes are strongly
+consistent, thanks to the Raft consensus algorithm.</li>
+<li><strong>Eventual Consistency:</strong> The system uses a gossip
+protocol to ensure that all nodes eventually converge to the same
+state.</li>
+<li><strong>Cluster Management:</strong> Nodes can dynamically join the
+cluster.</li>
+</ul>
+</div><div class="slide"><h2 id="architecture">Architecture</h2>
+<p>The project is structured into the following components:</p>
+<ul>
+<li><strong><code>main.go</code></strong>: The main application file,
+responsible for starting the gRPC server and the Raft instance.</li>
+<li><strong><code>raft.go</code></strong>: Implements the Raft Finite
+State Machine (FSM), which applies commands from the Raft log to the
+in-memory store.</li>
+<li><strong><code>ring.go</code></strong>: A from-scratch implementation
+of a consistent hashing ring to map keys to nodes.</li>
+<li><strong><code>gossip.go</code></strong>: Contains the implementation
+of the gossip protocol for state reconciliation.</li>
+<li><strong><code>proto/kv.proto</code></strong>: The Protocol Buffers
+definition for the gRPC service, defining the <code>Put</code>,
+<code>Get</code>, <code>Join</code>, and <code>Gossip</code> RPCs.</li>
+<li><strong><code>cli/main.go</code></strong>: A simple command-line
+client for interacting with the cluster.</li>
+</ul>
+</div><div class="slide"><h3 id="gossip-protocol">Gossip Protocol</h3>
+<p>The system uses a gossip protocol to ensure eventual consistency
+across all nodes. Each node periodically selects a random peer and
+shares its current state. When a node receives a gossip message, it
+merges the received state with its own using a “last-write-wins”
+strategy. This mechanism allows information to propagate through the
+cluster, ensuring that all nodes eventually converge to a consistent
+view of the data.</p>
+</div><div class="slide"><h3 id="thread-safe-and-concurrent-design">Thread-Safe and Concurrent
+Design</h3>
+<ol style="list-style-type: decimal">
+<li><strong>Core Key-Value Store:</strong> The central data store
+(<code>Store</code> struct in <code>main.go</code>) is designed to be
+thread-safe. It uses a <code>sync.RWMutex</code>, which is the correct
+synchronization primitive for a data structure that has both reads and
+writes. This ensures that:
+<ul>
+<li>Multiple goroutines can safely read data concurrently
+(<code>Get</code> method).</li>
+<li>Only one goroutine can write data at a time, preventing data
+corruption (<code>Put</code> method).</li>
+</ul></li>
+<li><strong>Concurrent Goroutines for High Load:</strong> The
+application effectively uses goroutines to handle concurrent operations:
+<ul>
+<li><strong>gRPC Server:</strong> The main gRPC server runs in its own
+goroutine. The gRPC framework itself is designed for high performance
+and handles each incoming client request in a separate goroutine,
+allowing the server to manage many simultaneous connections.</li>
+<li><strong>Gossip Protocol:</strong> The gossiping mechanism runs in a
+dedicated background goroutine (<code>startGossip</code> in
+<code>main.go</code>), periodically communicating with other nodes
+without blocking the main application flow.</li>
+<li><strong>Raft Consensus:</strong> The project uses the
+<code>hashicorp/raft</code> library, a mature and battle-tested
+implementation of the Raft consensus algorithm. This library is
+inherently concurrent and designed to manage a distributed state machine
+in a fault-tolerant way.</li>
+</ul></li>
+</ol>
+</div><div class="slide"><h2 id="how-to-run">How to Run</h2>
+</div><div class="slide"><h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Go</li>
+<li>Protocol Buffers Compiler (<code>protoc</code>)</li>
+</ul>
+</div><div class="slide"><h3 id="build-the-project">1. Build the Project</h3>
+<p>First, ensure all dependencies are downloaded:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">go</span> mod tidy</span></code></pre></div>
+<p>Generate the GRPC protobufs</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$PATH</span><span class="st">:</span><span class="va">$(</span><span class="ex">go</span> env GOPATH<span class="va">)</span><span class="st">/bin&quot;</span> <span class="kw">&amp;&amp;</span> <span class="ex">protoc</span> <span class="at">--go_out</span><span class="op">=</span>. <span class="dt">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>--go_opt=paths=source_relative <span class="at">--go-grpc_out</span><span class="op">=</span>. <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>--go-grpc_opt=paths=source_relative proto/kv.proto</span></code></pre></div>
+</div><div class="slide"><h3 id="start-the-cluster">2. Start the Cluster</h3>
+<p>You will need to open three separate terminals to run a 3-node
+cluster.</p>
+<p><strong>Terminal 1: Start the first node (bootstrap
+node)</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="bu">echo</span> <span class="er">(</span><span class="st">&quot;single node&quot;</span><span class="kw">)</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="ex">go</span> run . <span class="at">--bootstrap</span></span></code></pre></div>
+<p>OR</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">go</span> run . <span class="at">--port</span><span class="op">=</span>50051 <span class="at">--raft_port</span><span class="op">=</span>12001 <span class="at">--node_id</span><span class="op">=</span>node1 <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>--raft_dir=/tmp/raft1 <span class="at">--bootstrap</span><span class="op">=</span>true</span></code></pre></div>
+<p><strong>Terminal 2: Start the second node and join the
+cluster</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="ex">go</span> run . <span class="at">--port</span><span class="op">=</span>50052 <span class="at">--raft_port</span><span class="op">=</span>12002 <span class="at">--node_id</span><span class="op">=</span>node2 <span class="dt">\</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>--raft_dir=/tmp/raft2 <span class="at">--join_addr</span><span class="op">=</span>localhost:50051</span></code></pre></div>
+<p><strong>Terminal 3: Start the third node and join the
+cluster</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">go</span> run . <span class="at">--port</span><span class="op">=</span>50053 <span class="at">--raft_port</span><span class="op">=</span>12003 <span class="at">--node_id</span><span class="op">=</span>node3 <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>--raft_dir=/tmp/raft3 <span class="at">--join_addr</span><span class="op">=</span>localhost:50051</span></code></pre></div>
+</div><div class="slide"><h3 id="interact-with-the-cluster">3. Interact with the Cluster</h3>
+<p>Open a fourth terminal to run the client application.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="ex">go</span> run cli/main.go</span></code></pre></div>
+<p>This will send a <code>Put</code> request to store a key-value pair
+and then a <code>Get</code> request to retrieve it.</p>
+</div><div class="slide"><h3 id="test-fault-tolerance">4. Test Fault Tolerance</h3>
+<p>To test the system’s fault tolerance, you can stop one of the nodes
+(e.g., by pressing <code>Ctrl+C</code> in its terminal). Then, run the
+client again. The <code>Put</code> and <code>Get</code> operations
+should still succeed as long as a majority of the nodes (a quorum) are
+still running.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span></span></code></pre></div>
+</div><div class="slide"><h2 id="performance">Performance</h2>
+<p>Benchmarks were run to measure the performance of <code>Put</code>
+and <code>Get</code> operations. You can run the benchmarks yourself
+using the following command:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-bench</span><span class="op">=</span>. <span class="at">-benchmem</span> <span class="at">-run</span><span class="op">=</span>^$</span></code></pre></div>
+</div><div class="slide"><h3 id="results">Results</h3>
+<p>Here are the results from a sample run:</p>
+<pre><code>BenchmarkPut-8        20599          57753 ns/op        8949 B/op        171 allocs/op
+BenchmarkGet-8        21543          59570 ns/op        8949 B/op        171 allocs/op</code></pre>
+</div><div class="slide"><h3 id="understanding-the-metrics">Understanding the Metrics</h3>
+<ul>
+<li><strong><code>ns/op</code> (Nanoseconds per operation):</strong>
+This is the average time it took to execute a single operation. A lower
+number indicates better performance.</li>
+<li><strong><code>B/op</code> (Bytes per operation):</strong> This
+represents the average amount of memory allocated per operation. A lower
+number is better, as it indicates more efficient memory usage.</li>
+<li><strong><code>allocs/op</code> (Allocations per operation):</strong>
+This is the average number of memory allocations made per operation.
+Fewer allocations generally lead to less work for the garbage collector
+and better performance.</li>
+</ul>
+</div><div class="slide"><h3 id="deriving-latency-and-throughput">Deriving Latency and
+Throughput</h3>
+<p>From these metrics, we can derive the latency and throughput of the
+system.</p>
+<ul>
+<li><strong>Latency:</strong> The <code>ns/op</code> value directly
+represents the average latency for a single operation.</li>
+<li><strong>Throughput:</strong> Throughput is the number of operations
+the system can handle per second. It can be calculated as the inverse of
+the latency (<code>1,000,000,000 ns/second / ns/op</code>).</li>
+</ul>
+</div><div class="slide"><h3 id="system-performance">System Performance</h3>
+<p>Based on the benchmark results, the current system performance is as
+follows:</p>
+<ul>
+<li><strong>Put Operation:</strong>
+<ul>
+<li><strong>Latency:</strong> <strong>57,753 ns/op</strong>
+(approximately 57.75 microseconds)</li>
+<li><strong>Throughput:</strong> <strong>~17,315
+operations/second</strong></li>
+</ul></li>
+<li><strong>Get Operation:</strong>
+<ul>
+<li><strong>Latency:</strong> <strong>56,783 ns/op</strong>
+(approximately 56.78 microseconds)</li>
+<li><strong>Throughput:</strong> <strong>~17,611
+operations/second</strong></li>
+</ul></li>
+</ul>
+</div>
+<div id="chapter-3-closing-notes" class="slide section level1">
+<h1>Chapter 3: Closing Notes</h1>
+<blockquote>
+<p>Date: 22-09-2025 Author: Sounish Nath</p>
+</blockquote>
+<p>Based on my analysis of the codebase, here is the answer to your
+question:</p>
+<p>Yes, the project is largely implemented to be thread-safe and uses
+concurrent goroutines to handle load, but there is a potential race
+condition in one part of the code.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Hope you loved it. Feel free to create your valuable Notes</span></span></code></pre></div>
+<p><strong>Sounish Nath</strong></p>
+</div>
+</body>
+</html>

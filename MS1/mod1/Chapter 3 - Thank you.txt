@@ -1,0 +1,14 @@
+# Chapter 3: Closing Notes
+> Date: 22-09-2025
+> Author: Sounish Nath
+
+
+Based on my analysis of the codebase, here is the answer to your question:
+
+Yes, the project is largely implemented to be thread-safe and uses concurrent goroutines to handle load, but there is a potential race condition in one part of the code.
+
+```bash
+echo "Hope you loved it. Feel free to create your valuable Notes
+```
+
+**Sounish Nath**

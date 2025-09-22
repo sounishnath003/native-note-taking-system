@@ -1,0 +1,284 @@
+#!/bin/bash
+# Reference: https://github.com/connermcd/notes
+# Script has been further improved as my convience to search and generate the note takings pdf
+
+set -e
+
+usage() {
+cat << EOF
+USAGE:
+
+   notes <workdir> [subfolder]
+
+EXAMPLES:
+
+   notes /path/to/notes
+      compiles all notes in the specified directory
+
+   notes /path/to/notes MS1
+      compiles notes in MS1 subfolder
+
+   notes /path/to/notes MS1/mod1
+      compiles notes in MS1/mod1 subfolder
+
+EOF
+}
+
+makepdf() {
+   local output_file="$1"
+   shift
+   local input_files=("$@")
+   
+   pandoc --pdf-engine=lualatex -H $SCRIPT_DIR/fonts.tex --toc \
+      -V geometry:margin=2.5cm \
+      -o "${output_file}.pdf" $SCRIPT_DIR/about.md "${input_files[@]}" &&
+   echo "Created ${output_file}.pdf"
+}
+
+makehtml() {
+   local output_file="$1"
+   shift
+   local input_files=("$@")
+   
+   pandoc -w slidy -H $SCRIPT_DIR/slidy.html -s "${input_files[@]}" | \
+      sed -e 's/<h[2-9]/<\/div><div class=\"slide\">&/' \
+      -e 's/slidy.js.gz/slidy.js/' > "${output_file}.html" &&
+      echo "Created ${output_file}.html"
+}
+
+process_directory() {
+   local dir="$1"
+   local output_name="$2"
+   
+   echo "Processing directory: $dir"
+   
+   # Find all .txt and .md files
+   local files=()
+   while IFS= read -r -d '' file; do
+      files+=("$file")
+   done < <(find "$dir" -maxdepth 1 -type f \( -name "*.md" -o -name "*.txt" \) -print0 | sort -z)
+   
+   if [[ ${#files[@]} -eq 0 ]]; then
+      echo "No .txt or .md files found in $dir"
+      return 1
+   fi
+   
+   echo "Found ${#files[@]} files: ${files[*]}"
+   
+   local output_file="$dir/$output_name"
+   makepdf "$output_file" "${files[@]}"
+   makehtml "$output_file" "${files[@]}"
+   
+   echo "Completed processing: $dir"
+}
+
+process_subfolder() {
+   local subfolder="$1"
+   local subfolder_path="$NOTES_DIR/$subfolder"
+   
+   echo "Processing subfolder: $subfolder"
+   
+   # Check if it's a direct module directory (contains .md/.txt files)
+   if find "$subfolder_path" -maxdepth 1 -type f \( -name "*.md" -o -name "*.txt" \) | grep -q .; then
+      echo "Found note files directly in subfolder, processing as module"
+      process_directory "$subfolder_path" "$(basename "$subfolder")"
+      return 0
+   fi
+   
+   # Check for mod* directories
+   local mod_dirs=()
+   while IFS= read -r -d '' dir; do
+      mod_dirs+=("$dir")
+   done < <(find "$subfolder_path" -maxdepth 1 -type d -name "mod*" -print0 | sort -z)
+   
+   if [[ ${#mod_dirs[@]} -gt 0 ]]; then
+      echo "Found ${#mod_dirs[@]} mod* directories"
+      for mod_dir in "${mod_dirs[@]}"; do
+         mod_name=$(basename "$mod_dir")
+         process_directory "$mod_dir" "$mod_name"
+      done
+      
+         # Merge PDFs (even if only one module)
+         cd "$subfolder_path"
+         echo "Merging PDFs for subfolder: $subfolder"
+         
+         local pdf_files=($(find . -name "*.pdf" -type f | sort))
+         if [[ ${#pdf_files[@]} -gt 0 ]]; then
+            if command -v gs >/dev/null 2>&1; then
+               output_pdf="$(basename "$subfolder").pdf"
+               if gs -sDEVICE=pdfwrite -dQUIET -o "$output_pdf" "${pdf_files[@]}" 2>/dev/null; then
+                  echo "Created merged PDF: $output_pdf"
+               else
+                  echo "Failed to merge PDFs for $subfolder"
+               fi
+            else
+               echo "Ghostscript (gs) not found. Skipping PDF merging."
+            fi
+         fi
+         cd - &>/dev/null
+      return 0
+   fi
+   
+   # Check for MS* directories
+   local ms_dirs=()
+   while IFS= read -r -d '' dir; do
+      ms_dirs+=("$dir")
+   done < <(find "$subfolder_path" -maxdepth 1 -type d -name "MS*" -print0 | sort -z)
+   
+   if [[ ${#ms_dirs[@]} -gt 0 ]]; then
+      echo "Found ${#ms_dirs[@]} MS* directories"
+      for ms_dir in "${ms_dirs[@]}"; do
+         ms_name=$(basename "$ms_dir")
+         echo "Processing MS directory: $ms_name"
+         
+         # Find mod* directories in this MS directory
+         local mod_dirs=()
+         while IFS= read -r -d '' dir; do
+            mod_dirs+=("$dir")
+         done < <(find "$ms_dir" -maxdepth 1 -type d -name "mod*" -print0 | sort -z)
+         
+         if [[ ${#mod_dirs[@]} -gt 0 ]]; then
+            echo "Found ${#mod_dirs[@]} modules in $ms_name"
+            for mod_dir in "${mod_dirs[@]}"; do
+               mod_name=$(basename "$mod_dir")
+               process_directory "$mod_dir" "$mod_name"
+            done
+            
+            # Merge PDFs for this MS directory (even if only one module)
+            cd "$ms_dir"
+            echo "Merging PDFs for $ms_name..."
+            
+            local pdf_files=($(find . -name "*.pdf" -type f | sort))
+            if [[ ${#pdf_files[@]} -gt 0 ]]; then
+               if command -v gs >/dev/null 2>&1; then
+                  output_pdf="$ms_name.pdf"
+                  if gs -sDEVICE=pdfwrite -dQUIET -o "$output_pdf" "${pdf_files[@]}" 2>/dev/null; then
+                     echo "Created merged PDF: $output_pdf"
+                  else
+                     echo "Failed to merge PDFs for $ms_name"
+                  fi
+               else
+                  echo "Ghostscript (gs) not found. Skipping PDF merging."
+               fi
+            fi
+            cd - &>/dev/null
+         else
+            echo "No modules found in $ms_name"
+         fi
+      done
+      return 0
+   fi
+   
+   echo "No valid structure found in subfolder: $subfolder"
+   return 1
+}
+
+process_all() {
+   echo "Processing all notes in: $NOTES_DIR"
+   
+   # Find all MS* directories
+   local ms_dirs=()
+   while IFS= read -r -d '' dir; do
+      ms_dirs+=("$dir")
+   done < <(find "$NOTES_DIR" -maxdepth 1 -type d -name "MS*" -print0 | sort -z)
+   
+   if [[ ${#ms_dirs[@]} -eq 0 ]]; then
+      echo "No MS* directories found in $NOTES_DIR"
+      return 1
+   fi
+   
+   echo "Found ${#ms_dirs[@]} MS* directories"
+   
+   for ms_dir in "${ms_dirs[@]}"; do
+      ms_name=$(basename "$ms_dir")
+      echo "Processing MS directory: $ms_name"
+      
+      # Find mod* directories in this MS directory
+      local mod_dirs=()
+      while IFS= read -r -d '' dir; do
+         mod_dirs+=("$dir")
+      done < <(find "$ms_dir" -maxdepth 1 -type d -name "mod*" -print0 | sort -z)
+      
+      if [[ ${#mod_dirs[@]} -gt 0 ]]; then
+         echo "Found ${#mod_dirs[@]} modules in $ms_name"
+         for mod_dir in "${mod_dirs[@]}"; do
+            mod_name=$(basename "$mod_dir")
+            process_directory "$mod_dir" "$mod_name"
+         done
+         
+         # Merge PDFs for this MS directory (even if only one module)
+         cd "$ms_dir"
+         echo "Merging PDFs for $ms_name..."
+         
+         local pdf_files=($(find . -name "*.pdf" -type f | sort))
+         if [[ ${#pdf_files[@]} -gt 0 ]]; then
+            if command -v gs >/dev/null 2>&1; then
+               output_pdf="$ms_name.pdf"
+               if gs -sDEVICE=pdfwrite -dQUIET -o "$output_pdf" "${pdf_files[@]}" 2>/dev/null; then
+                  echo "Created merged PDF: $output_pdf"
+               else
+                  echo "Failed to merge PDFs for $ms_name"
+               fi
+            else
+               echo "Ghostscript (gs) not found. Skipping PDF merging."
+            fi
+         fi
+         cd - &>/dev/null
+      else
+         echo "No modules found in $ms_name"
+      fi
+   done
+}
+
+main() {
+   # Check if workdir argument is provided
+   if [[ $# -eq 0 ]]; then
+      echo "Error: Work directory argument is required"
+      usage
+      exit 1
+   fi
+   
+   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+   
+   # Check for required files in script directory
+   if [[ ! -f "$SCRIPT_DIR/about.md" ]]; then
+      echo "Error: Required file not found: $SCRIPT_DIR/about.md"
+      exit 1
+   fi
+   
+   # Handle subfolder argument
+   if [[ $# -eq 2 ]]; then
+      NOTES_DIR="$1"
+      subfolder="$2"
+      
+      # Validate NOTES_DIR
+      if [[ ! -d "$NOTES_DIR" ]]; then
+         echo "Error: Work directory not found: $NOTES_DIR"
+         exit 1
+      fi
+      
+      # Check if subfolder exists
+      if [[ ! -d "$NOTES_DIR/$subfolder" ]]; then
+         echo "Error: Subfolder not found: $NOTES_DIR/$subfolder"
+         exit 1
+      fi
+      
+      # Process specific subfolder
+      echo "Compiling notes in subfolder: $subfolder"
+      process_subfolder "$subfolder"
+   else
+      # Single argument - could be workdir or direct path
+      if [[ -d "$1" ]]; then
+         NOTES_DIR="$1"
+         process_all
+      else
+         echo "Error: Directory not found: $1"
+         exit 1
+      fi
+   fi
+   
+   echo "Script execution completed successfully"
+}
+
+# Run main function
+main "$@"

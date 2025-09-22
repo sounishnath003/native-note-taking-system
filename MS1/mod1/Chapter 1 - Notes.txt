@@ -1,0 +1,14 @@
+# Chapter 1: Distributed Key Storage Systems
+> Date: 22-09-2025
+> Instructor: Sounish Nath
+
+## Main points
+    * Basic amino acid structure
+    * Overview of amino acid
+    * Peptide, bonds and polypeptide confirmations restrictions
+    * Primary, secondary, tertiary structure of proteins in body
+    * Diseases caused of manifold of proteins
+
+## Basics of Amino Acid
+    * Peptide, bonds and polypeptide confirmations restrictions
+    * L and D isomers, L are used for proteins 
